@@ -8,9 +8,11 @@ class OneHourElectricity extends Model
 {
     protected $fillable = ['panel_id', 'kilowatts', 'hour'];
 
+    protected $dates = [ 'hour' ];
+
     public static $fieldValidations = [
-        'banel_id'  => 'required',
-        'kilowatts' => 'required',
+        'panel_id'  => 'required',
+        'kilowatts' => 'required|numeric',
         'hour'      => 'required|date_format:Y-m-d H:i:s|unique:one_hour_electricities,hour,NULL,panel_id'
     ];
 }
