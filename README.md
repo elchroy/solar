@@ -32,6 +32,43 @@ new servers.
 5. Implement CI/CD pipeline for Andela Solar so that anytime code is pushed to a feature or the master branch, it triggers
 a deployment of the project to a PaaS like Heroku. Also, describe how you'd upload your code coverage report to a service.
 
+## Task Implementation
+```php
+//  ...
+public function index(Request $request)
+{
+    $panel = Panel::select('id')->where('serial', $request->panel_serial)->first();
+
+    $oneEs = DB::table('one_hour_electricities')
+        ->select('kilowatts')
+        ->where('panel_id', $panel->id)
+        ->whereDate('hour', Carbon::today()->format("Y-m-d"))
+        ->get();
+
+    return response()->json([
+        'day' => Carbon::today()->format("Y-m-d"),
+        'sum' => (double) $oneEs->sum($kw = 'kilowatts'),
+        'min' => (double) $oneEs->min($kw),
+        'max' => (double) $oneEs->max($kw),
+        'average' => (double) $oneEs->avg($kw),
+    ], 200);
+}
+```
+##### Explanation
+- First fetch the `$panel` instance using it's serial number from the incoming `$request`
+- Using `QueryBuilder`s, build a query to fetch all `OneHourElectricities` belong to the `$panel`, and who have `hour` values, for the current day, i.e after the end of the previous day.
+- Only `select` the `kilowatts` attribute, which is to be used the required computations.
+- This is a better approach as it does not fetch all information about the models, including information that we don't need for the computation of the report.
+- The result of executing the query, results in a `Collection`, and then the `min`, `max`, `sum` and `avg` values are computed on the collection itself.
+- The report data is returned as JSON to the requesting client, and the response status is 200.
+
+##### Other tasks
+- Fixed some bugs, including validation rules for creating `Panel`s.
+- Implemented CI/CD with TravisCI and Heroku. I had to re-create this project on a public repo [here](https://github.com/elchroy/solar). For any branch that is pushed and a PR raised, Heroku creates a ReviewApp. However, I didn't include the environment variables for this. 
+- [![Build Status](https://travis-ci.org/elchroy/solar.svg?branch=roy/ft-one-day-panel-electricity-history)](https://travis-ci.org/elchroy/solar) *The badge is for the `roy/ft-one-day-panel-electricity-history` branch.*
+- Attained 100% test coverage. I used XDebug for local coverage reporting, and Coveralls for online coverage reporting. [![Coverage Status](https://coveralls.io/repos/github/elchroy/solar/badge.svg?branch=roy%2Fft-one-day-panel-electricity-history)](https://coveralls.io/github/elchroy/solar?branch=roy%2Fft-one-day-panel-electricity-history)
+
+
 ## Pre-requisites:
 
 - PHP >= 7
