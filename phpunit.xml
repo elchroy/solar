@@ -37,7 +37,6 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="QUEUE_DRIVER" value="sync"/>
         <env name="MAIL_DRIVER" value="array"/>
-        <!-- <env name="DB_DATABASE" value="andela-solar-test"/> -->
         <env name="DB_DATABASE" value="./storage/database.sqlite"/>
         <env name="DB_CONNECTION" value="sqlite"/>
     </php>
